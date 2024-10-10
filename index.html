@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Formulário Protegido</title>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <style>
+      body {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(
+            217deg,
+            rgba(255, 0, 0, 0.7),
+            rgba(255, 0, 0, 0) 70%
+          ),
+          linear-gradient(
+            127deg,
+            rgba(55, 200, 200, 0.8),
+            rgba(55, 200, 200, 0) 70%
+          )
+          /* linear-gradient(336deg, rgba(0, 0, 255, 0.9), rgba(0, 0, 255, 0) 70%); */
+      }
+      form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: #fafafa;
+        max-width: 400px;
+        margin: 50px auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        gap: 16px;
+      }
+      button:disabled {
+        background-color: #ccc;
+      }
+      .hidden {
+        display: none;
+      }
+      div {
+        display: flex;
+        gap: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <form id="myForm" onsubmit="handleSubmit(event)">
+      <h2>Formulário Protegido</h2>
+      <div>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required />
+      </div>
+      <div>
+        <label for="password">Senha:</label>
+        <input type="password" id="password" name="password" required />
+      </div>
+
+      <!-- Honeypot para enganar bots -->
+      <input type="text" name="honeypot" class="hidden" id="honeypot" />
+
+      <!-- Google reCAPTCHA -->
+      <div class="g-recaptcha" data-sitekey="your-site-key"></div>
+
+      <button id="submitButton" style="align-self: self-end" type="submit">
+        Enviar
+      </button>
+    </form>
+
+    <script>
+      // Limita envios de formulário usando localStorage
+      function limitSubmissions() {
+        let submitCount = localStorage.getItem("submitCount") || 0;
+        if (submitCount >= 3) {
+          alert(
+            "Você atingiu o limite de tentativas. Tente novamente mais tarde."
+          );
+          return false;
+        } else {
+          localStorage.setItem("submitCount", ++submitCount);
+          setTimeout(() => localStorage.setItem("submitCount", 0), 60000); // Limpa em 1 minuto
+          return true;
+        }
+      }
+
+      // Desabilita o botão de envio para prevenir múltiplos envios rápidos
+      function disableButton() {
+        document.getElementById("submitButton").disabled = true;
+      }
+
+      // Verifica se o honeypot foi preenchido, sinalizando tentativa de bot
+      function checkHoneypot() {
+        let honeypot = document.getElementById("honeypot").value;
+        if (honeypot !== "") {
+          alert("Bot detectado!");
+          return false;
+        }
+        return true;
+      }
+
+      // Função principal para tratar o envio do formulário
+      function handleSubmit(event) {
+        event.preventDefault(); // Previne o envio padrão
+
+        // Verifica honeypot e o limite de envios
+        if (checkHoneypot() && limitSubmissions()) {
+          disableButton(); // Desativa o botão de envio
+          // Aqui você faria a chamada ao servidor ou API
+          alert("Formulário enviado com sucesso!");
+          // Enviar o formulário programaticamente, se desejado:
+          // document.getElementById('myForm').submit();
+        }
+      }
+    </script>
+  </body>
+</html>
